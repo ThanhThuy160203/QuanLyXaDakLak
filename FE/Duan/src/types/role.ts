@@ -1,0 +1,17 @@
+export type RoleKey =
+  | 'EMPLOYEE'
+  | 'DEPARTMENT_HEAD'
+  | 'DEPUTY_CHAIR'
+  | 'CHAIRMAN'
+  | 'AGGREGATOR'
+  | 'ADMIN';
+
+export type RoleDefinition = {
+  key: RoleKey;
+  label: string;
+  description: string;
+  scope: 'PERSONAL' | 'DEPARTMENT' | 'DISTRICT' | 'CITY' | 'CROSS_DEPARTMENT';
+  capabilities: string[];
+  escalatesTo?: RoleKey[];
+  assignsTo: RoleKey[];
+};
