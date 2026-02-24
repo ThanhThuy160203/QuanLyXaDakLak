@@ -12,23 +12,13 @@ import { buildTaskMetrics, filterTasks, getTaskUrgency } from '../../utils/tasks
 
 export const DashboardScreen = () => {
 	const user = useAuthStore(state => state.user);
-	const {
-		tasks,
-		timeframe,
-		statusScope,
-		roleView,
-		setRoleView,
-		setTimeframe,
-		setStatusScope,
-	} = useTaskStore(state => ({
-		tasks: state.tasks,
-		timeframe: state.timeframe,
-		statusScope: state.statusScope,
-		roleView: state.roleView,
-		setRoleView: state.setRoleView,
-		setTimeframe: state.setTimeframe,
-		setStatusScope: state.setStatusScope,
-	}));
+	const tasks = useTaskStore(state => state.tasks);
+	const timeframe = useTaskStore(state => state.timeframe);
+	const statusScope = useTaskStore(state => state.statusScope);
+	const roleView = useTaskStore(state => state.roleView);
+	const setRoleView = useTaskStore(state => state.setRoleView);
+	const setTimeframe = useTaskStore(state => state.setTimeframe);
+	const setStatusScope = useTaskStore(state => state.setStatusScope);
 
 	useEffect(() => {
 		if (user?.role) {

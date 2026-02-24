@@ -1,39 +1,50 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import {
-	ActivityIndicator,
-	KeyboardAvoidingView,
-	Platform,
-	StyleSheet,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import type { AuthStackParamList } from '../../navigation/AuthStack';
 import { useAuthStore } from '../../store/auth.store';
 
-type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
+type RegisterScreenProps = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
-export const LoginScreen = ({ navigation }: LoginScreenProps) => {
-	const [email, setEmail] = useState('nhanvien@duan.gov.vn');
-	const [password, setPassword] = useState('DuAn@123');
+export const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 	const [localError, setLocalError] = useState<string | null>(null);
-	const login = useAuthStore(state => state.login);
+	const register = useAuthStore(state => state.register);
 	const loading = useAuthStore(state => state.loading);
 	const error = useAuthStore(state => state.error);
 
-	const handleLogin = async () => {
+	const handleRegister = async () => {
 		setLocalError(null);
-		if (!email || !password) {
-			setLocalError('Vui lòng nhập email và mật khẩu');
+		if (!email || !password || !confirmPassword) {
+			setLocalError('Vui lòng nhập đầy đủ thông tin');
+			return;
+		}
+
+		if (password.length < 6) {
+			setLocalError('Mật khẩu phải có ít nhất 6 ký tự');
+			return;
+		}
+
+		if (password !== confirmPassword) {
+			setLocalError('Mật khẩu xác nhận không khớp');
 			return;
 		}
 
 		try {
-			await login({ email, password });
+			await register({ email, password });
 		} catch (err) {
-			console.warn('Login error', err);
+			console.warn('Register error', err);
 		}
 	};
 
@@ -43,11 +54,11 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
 			style={styles.container}
 		>
 			<View style={styles.content}>
-				<Text style={styles.title}>Đăng nhập hệ thống công việc</Text>
-				<Text style={styles.subtitle}>Sử dụng tài khoản Firebase tạm thời</Text>
+				<Text style={styles.title}>Tạo tài khoản mới</Text>
+				<Text style={styles.subtitle}>Đăng ký để truy cập hệ thống công việc</Text>
 
 				<View style={styles.formGroup}>
-					<Text style={styles.label}>Email</Text>
+					<Text style={styles.label}>Email công vụ</Text>
 					<TextInput
 						placeholder="ten@duan.gov.vn"
 						placeholderTextColor="#94A3B8"
@@ -71,24 +82,36 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
 					/>
 				</View>
 
+				<View style={styles.formGroup}>
+					<Text style={styles.label}>Xác nhận mật khẩu</Text>
+					<TextInput
+						placeholder="••••••••"
+						placeholderTextColor="#94A3B8"
+						secureTextEntry
+						value={confirmPassword}
+						onChangeText={setConfirmPassword}
+						style={styles.input}
+					/>
+				</View>
+
 				{(localError || error) && (
 					<Text style={styles.errorText}>{localError || error}</Text>
 				)}
 
 				<TouchableOpacity
-					onPress={handleLogin}
+					onPress={handleRegister}
 					style={[styles.button, loading && styles.buttonDisabled]}
 					disabled={loading}
 				>
 					{loading ? (
 						<ActivityIndicator color="#FFFFFF" />
 					) : (
-						<Text style={styles.buttonLabel}>Đăng nhập</Text>
+						<Text style={styles.buttonLabel}>Đăng ký</Text>
 					)}
 				</TouchableOpacity>
 
-				<TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate('Register')}>
-					<Text style={styles.linkLabel}>Chưa có tài khoản? Đăng ký ngay</Text>
+				<TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate('Login')}>
+					<Text style={styles.linkLabel}>Đã có tài khoản? Đăng nhập</Text>
 				</TouchableOpacity>
 			</View>
 		</KeyboardAvoidingView>
@@ -139,7 +162,7 @@ const styles = StyleSheet.create({
 		color: '#0F172A',
 	},
 	button: {
-		backgroundColor: '#1D4ED8',
+		backgroundColor: '#0F9D58',
 		borderRadius: 16,
 		paddingVertical: 14,
 		alignItems: 'center',
@@ -153,18 +176,18 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		fontSize: 15,
 	},
+	errorText: {
+		color: '#DC2626',
+		fontSize: 13,
+		marginBottom: 8,
+	},
 	linkButton: {
 		marginTop: 16,
 		alignItems: 'center',
 	},
 	linkLabel: {
-		color: '#0F9D58',
+		color: '#1D4ED8',
 		fontSize: 14,
 		fontWeight: '500',
-	},
-	errorText: {
-		color: '#DC2626',
-		fontSize: 13,
-		marginBottom: 8,
 	},
 });

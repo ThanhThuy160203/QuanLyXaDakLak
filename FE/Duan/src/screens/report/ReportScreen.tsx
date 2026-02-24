@@ -6,11 +6,9 @@ import { useTaskStore } from '../../store/task.store';
 import { buildTaskMetrics } from '../../utils/tasks';
 
 export const ReportScreen = () => {
-	const { tasks, roleView, timeframe } = useTaskStore(state => ({
-		tasks: state.tasks,
-		roleView: state.roleView,
-		timeframe: state.timeframe,
-	}));
+	const tasks = useTaskStore(state => state.tasks);
+	const roleView = useTaskStore(state => state.roleView);
+	const timeframe = useTaskStore(state => state.timeframe);
 
 	const metrics = useMemo(() => buildTaskMetrics(tasks, roleView, timeframe), [
 		tasks,

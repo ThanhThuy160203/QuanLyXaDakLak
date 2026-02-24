@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { FirebaseSignInPayload, signInWithEmail } from '../services/firebaseAuth';
 import { DEFAULT_ROLE, ROLE_DIRECTORY } from '../constants/roles';
+import { FirebaseSignInPayload, signInWithEmail, signUpWithEmail } from '../services/firebaseAuth';
 import { AuthSession, RoleKey, UserProfile } from '../types';
 
 const AUTH_STORAGE_KEY = '@duan/auth';
@@ -18,6 +18,7 @@ type AuthStoreState = {
 	error: string | null;
 	hydrated: boolean;
 	login: (payload: FirebaseSignInPayload) => Promise<void>;
+	register: (payload: FirebaseSignInPayload) => Promise<void>;
 	logout: () => Promise<void>;
 	bootstrap: () => Promise<void>;
 	overrideRole: (role: RoleKey) => void;
@@ -53,6 +54,9 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 	error: null,
 	hydrated: false,
 	async bootstrap() {
+		if (get().hydrated) {
+			return;
+		}
 		try {
 			const raw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
 			if (!raw) {
@@ -82,6 +86,25 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 			set({ user: profile, session, loading: false });
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Không thể đăng nhập';
+			set({ error: message, loading: false });
+			throw error;
+		}
+	},
+	async register(payload) {
+		set({ loading: true, error: null });
+		try {
+			const { firebaseUser, session } = await signUpWithEmail(payload);
+			const profile = buildProfile(firebaseUser.email, firebaseUser.uid);
+
+			const stored: StoredAuth = {
+				user: profile,
+				session,
+			};
+			await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(stored));
+
+			set({ user: profile, session, loading: false });
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Không thể đăng ký';
 			set({ error: message, loading: false });
 			throw error;
 		}

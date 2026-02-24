@@ -18,21 +18,12 @@ const SOURCE_FILTERS = [
 type SourceFilterValue = (typeof SOURCE_FILTERS)[number]['value'];
 
 export const TaskListScreen = () => {
-	const {
-		tasks,
-		roleView,
-		timeframe,
-		statusScope,
-		setTimeframe,
-		setStatusScope,
-	} = useTaskStore(state => ({
-		tasks: state.tasks,
-		roleView: state.roleView,
-		timeframe: state.timeframe,
-		statusScope: state.statusScope,
-		setTimeframe: state.setTimeframe,
-		setStatusScope: state.setStatusScope,
-	}));
+	const tasks = useTaskStore(state => state.tasks);
+	const roleView = useTaskStore(state => state.roleView);
+	const timeframe = useTaskStore(state => state.timeframe);
+	const statusScope = useTaskStore(state => state.statusScope);
+	const setTimeframe = useTaskStore(state => state.setTimeframe);
+	const setStatusScope = useTaskStore(state => state.setStatusScope);
 	const [sourceFilter, setSourceFilter] = useState<SourceFilterValue>('ALL');
 
 	const visibleTasks = useMemo(() => {
