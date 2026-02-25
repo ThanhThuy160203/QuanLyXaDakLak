@@ -2,12 +2,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
 import { ReportScreen } from '../screens/report/ReportScreen';
+import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { TaskListScreen } from '../screens/task/TaskListScreen';
 
 export type MainTabParamList = {
 	Dashboard: undefined;
 	Tasks: undefined;
 	Reports: undefined;
+	Settings: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -27,6 +29,7 @@ export const MainStack = () => (
 		<Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
 		<Tab.Screen name="Tasks" component={TaskListScreen} options={{ title: 'Nhiệm vụ' }} />
 		<Tab.Screen name="Reports" component={ReportScreen} options={{ title: 'Báo cáo' }} />
+		<Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Cài đặt' }} />
 	</Tab.Navigator>
 );
 
@@ -38,6 +41,8 @@ const getTabIcon = (routeName: keyof MainTabParamList) => {
 			return 'T';
 		case 'Reports':
 			return 'R';
+		case 'Settings':
+			return 'S';
 		default:
 			return '*';
 	}

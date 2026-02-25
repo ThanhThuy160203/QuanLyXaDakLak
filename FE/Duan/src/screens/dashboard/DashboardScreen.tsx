@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertBanner } from '../../components/AlertBanner';
 import { MetricCard } from '../../components/MetricCard';
-import { RoleSwitcher } from '../../components/RoleSwitcher';
 import { TaskCard } from '../../components/TaskCard';
 import { TaskFilterBar } from '../../components/TaskFilterBar';
 import { ROLE_MAP } from '../../constants/roles';
@@ -16,9 +15,9 @@ export const DashboardScreen = () => {
 	const timeframe = useTaskStore(state => state.timeframe);
 	const statusScope = useTaskStore(state => state.statusScope);
 	const roleView = useTaskStore(state => state.roleView);
-	const setRoleView = useTaskStore(state => state.setRoleView);
 	const setTimeframe = useTaskStore(state => state.setTimeframe);
 	const setStatusScope = useTaskStore(state => state.setStatusScope);
+	const setRoleView = useTaskStore(state => state.setRoleView);
 
 	useEffect(() => {
 		if (user?.role) {
@@ -56,7 +55,17 @@ export const DashboardScreen = () => {
 				Bạn đang xem góc nhìn của cấp {roleLabel.toLowerCase()}.
 			</Text>
 
-			<RoleSwitcher activeRole={roleView} onSelect={setRoleView} />
+			<View style={styles.roleSummary}>
+				<Text style={styles.roleSummaryEyebrow}>Phân quyền hiện tại</Text>
+				<Text style={styles.roleSummaryTitle}>{roleLabel}</Text>
+				<Text style={styles.roleSummaryDescription}>
+					{roleDetails?.description ?? 'Hệ thống đang áp dụng phân quyền mặc định cho tài khoản này.'}
+				</Text>
+				{user?.department && <Text style={styles.roleSummaryMeta}>Đơn vị: {user.department}</Text>}
+				<Text style={styles.roleSummaryNote}>
+					Liên hệ quản trị viên nếu phân quyền chưa chính xác. Bạn không thể tự chọn cấp hiển thị.
+				</Text>
+			</View>
 
 			<View style={styles.metricRow}>
 				<MetricCard label="Tổng nhiệm vụ" value={String(metrics.total)} helper="Theo bộ lọc hiện tại" />
@@ -95,7 +104,7 @@ export const DashboardScreen = () => {
 				<View style={styles.emptyState}>
 					<Text style={styles.emptyTitle}>Chưa có nhiệm vụ phù hợp bộ lọc</Text>
 					<Text style={styles.emptyDescription}>
-						Điều chỉnh bộ lọc để xem thêm nhiệm vụ của các cấp khác.
+						Thử thay đổi phạm vi thời gian hoặc trạng thái để tìm nhiệm vụ khác.
 					</Text>
 				</View>
 			)}
@@ -117,6 +126,43 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		color: '#64748B',
 		marginBottom: 16,
+	},
+	roleSummary: {
+		borderWidth: 1,
+		borderColor: '#E2E8F0',
+		borderRadius: 18,
+		padding: 16,
+		marginBottom: 16,
+		backgroundColor: '#FFFFFF',
+	},
+	roleSummaryEyebrow: {
+		fontSize: 12,
+		color: '#94A3B8',
+		textTransform: 'uppercase',
+		letterSpacing: 1,
+		marginBottom: 6,
+	},
+	roleSummaryTitle: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#0F172A',
+	},
+	roleSummaryDescription: {
+		fontSize: 13,
+		color: '#475569',
+		marginTop: 8,
+		lineHeight: 20,
+	},
+	roleSummaryMeta: {
+		fontSize: 12,
+		color: '#0F172A',
+		marginTop: 10,
+		fontWeight: '600',
+	},
+	roleSummaryNote: {
+		fontSize: 12,
+		color: '#94A3B8',
+		marginTop: 6,
 	},
 	metricRow: {
 		flexDirection: 'row',
