@@ -27,6 +27,12 @@ type StoredAuth = {
 	session: AuthSession;
 };
 
+type ProfileUpdateInput = {
+	displayName?: string;
+	department?: string | null;
+	managedDepartments?: string[];
+};
+
 type AuthStoreState = {
 	user: UserProfile | null;
 	session: AuthSession | null;
@@ -39,6 +45,7 @@ type AuthStoreState = {
 	logout: () => Promise<void>;
 	bootstrap: () => Promise<void>;
 	overrideRole: (role: RoleKey) => Promise<void>;
+	updateProfile: (payload: ProfileUpdateInput) => Promise<void>;
 };
 
 const syncRoleView = (role?: RoleKey) => {
@@ -222,5 +229,59 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 		}
 		set({ user: { ...user, role }, roleAssignments: nextAssignments });
 		syncRoleView(role);
+	},
+	async updateProfile(payload) {
+		const { user, session, roleAssignments } = get();
+		if (!user) {
+			return;
+		}
+
+		const normalizedEmail = user.email.toLowerCase();
+		const trimmedName = payload.displayName?.trim();
+		const hasDepartment = Object.prototype.hasOwnProperty.call(payload, 'department');
+		const hasManagedDepartments = Object.prototype.hasOwnProperty.call(
+			payload,
+			'managedDepartments',
+		);
+		const nextDepartment = hasDepartment
+			? payload.department?.trim() || undefined
+			: user.department;
+		const cleanedManaged = hasManagedDepartments
+			? payload.managedDepartments
+				?.map(entry => entry.trim())
+				.filter(Boolean)
+			: user.managedDepartments;
+
+		const updatedUser: UserProfile = {
+			...user,
+			displayName: trimmedName || user.displayName,
+			department: nextDepartment,
+			managedDepartments: cleanedManaged && cleanedManaged.length ? cleanedManaged : undefined,
+		};
+
+		const nextAssignments: Record<string, RoleAssignment> = {
+			...roleAssignments,
+			[normalizedEmail]: {
+				role: updatedUser.role,
+				displayName: updatedUser.displayName,
+				department: updatedUser.department,
+				managedDepartments: updatedUser.managedDepartments,
+			},
+		};
+		await AsyncStorage.setItem(
+			ROLE_ASSIGNMENT_STORAGE_KEY,
+			JSON.stringify(nextAssignments),
+		);
+
+		if (session) {
+			const stored: StoredAuth = {
+				user: updatedUser,
+				session,
+			};
+			await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(stored));
+		}
+
+		set({ user: updatedUser, roleAssignments: nextAssignments });
+		syncRoleView(updatedUser.role);
 	},
 }));

@@ -44,7 +44,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
 		>
 			<View style={styles.content}>
 				<Text style={styles.title}>Đăng nhập hệ thống công việc</Text>
-				<Text style={styles.subtitle}>Sử dụng tài khoản Firebase tạm thời</Text>
+				{/* <Text style={styles.subtitle}>Sử dụng tài khoản Firebase tạm thời</Text> */}
 
 				<View style={styles.formGroup}>
 					<Text style={styles.label}>Email</Text>

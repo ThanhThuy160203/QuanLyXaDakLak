@@ -80,7 +80,8 @@ export const DashboardScreen = () => {
 				<MetricCard label="Quá hạn" value={String(metrics.overdue)} accent="#DC2626" helper="Cần xử lý ngay" />
 				<MetricCard
 					label="Sắp đến hạn"
-					value={String(metrics.dueSoon)}
+					// value={String(metrics.dueSoon)}
+					value={`${metrics.dueSoon}`}
 					accent="#F97316"
 					helper="Theo dõi sát để tránh trễ"
 				/>

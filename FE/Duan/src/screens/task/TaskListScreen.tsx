@@ -10,7 +10,7 @@ const SOURCE_FILTERS = [
 	{ label: 'Tất cả nguồn', value: 'ALL' as const },
 	{ label: 'Sở/Ban/Ngành', value: 'SO' as const },
 	{ label: 'UBND Tỉnh', value: 'UBND_TINH' as const },
-	{ label: 'UBND Huyện', value: 'UBND_HUYEN' as const },
+	// { label: 'UBND Huyện', value: 'UBND_HUYEN' as const },
 	{ label: 'Chủ tịch', value: 'CHU_TICH' as const },
 	{ label: 'Nội bộ', value: 'NOI_BO' as const },
 ];
