@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { useAuthStore } from '../store/auth.store';
+import { useTaskStore } from '../store/task.store';
 import { AuthStack } from './AuthStack';
 import { MainStack } from './MainStack';
 
@@ -13,6 +14,9 @@ export const RootNavigator = () => {
 
   useEffect(() => {
     useAuthStore.getState().bootstrap();
+    useTaskStore.getState().fetchTasks().catch(error => {
+      console.warn('Failed to bootstrap tasks', error);
+    });
   }, []);
 
   if (!hydrated) {

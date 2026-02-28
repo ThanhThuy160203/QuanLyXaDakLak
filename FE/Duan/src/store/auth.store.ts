@@ -50,8 +50,6 @@ const syncRoleView = (role?: RoleKey) => {
 	}
 };
 
-const isWebOnlyRole = (role?: RoleKey) => role === 'ADMIN';
-
 const buildProfile = (
 	email: string,
 	uid: string,
@@ -106,12 +104,6 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 
 			const parsed: StoredAuth = JSON.parse(rawAuth);
 			const profile = buildProfile(parsed.user.email, parsed.user.uid, assignments);
-			if (isWebOnlyRole(profile.role)) {
-				await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-				set({ user: null, session: null, roleAssignments: assignments, hydrated: true });
-				syncRoleView(DEFAULT_ROLE);
-				return;
-			}
 			set({ user: profile, session: parsed.session, roleAssignments: assignments, hydrated: true });
 			syncRoleView(profile.role);
 		} catch (error) {
@@ -125,12 +117,6 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 		try {
 			const { firebaseUser, session } = await signInWithEmail(payload);
 			const profile = buildProfile(firebaseUser.email, firebaseUser.uid, get().roleAssignments);
-			if (isWebOnlyRole(profile.role)) {
-				await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-				set({ user: null, session: null, loading: false });
-				syncRoleView(DEFAULT_ROLE);
-				return;
-			}
 
 			const stored: StoredAuth = {
 				user: profile,
@@ -168,12 +154,6 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 				JSON.stringify(updatedAssignments),
 			);
 			const profile = buildProfile(firebaseUser.email, firebaseUser.uid, updatedAssignments);
-			if (isWebOnlyRole(profile.role)) {
-				await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-				set({ user: null, session: null, loading: false, roleAssignments: updatedAssignments });
-				syncRoleView(DEFAULT_ROLE);
-				return;
-			}
 
 			const stored: StoredAuth = {
 				user: profile,

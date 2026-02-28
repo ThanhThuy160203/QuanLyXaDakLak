@@ -4,7 +4,7 @@ export const CreateTaskScreen = () => (
 	<View style={styles.container}>
 		<Text style={styles.title}>Tạo nhiệm vụ mới</Text>
 		<Text style={styles.description}>
-			Khu vực này sẽ cho phép Tổng hợp, Chủ tịch hoặc Admin tạo nhiệm vụ, phân loại nguồn giao và giao xuống các cấp.
+			Khu vực này sẽ cho phép Tổng hợp hoặc Chủ tịch tạo nhiệm vụ, phân loại nguồn giao và giao xuống các cấp.
 			Form chi tiết sẽ được kết nối API trong giai đoạn tiếp theo.
 		</Text>
 	</View>

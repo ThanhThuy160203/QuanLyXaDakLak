@@ -71,19 +71,6 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     ],
     assignsTo: ['DEPUTY_CHAIR', 'DEPARTMENT_HEAD', 'EMPLOYEE'],
   },
-  {
-    key: 'ADMIN',
-    label: 'Admin',
-    description:
-      'Quản trị hệ thống, reset mật khẩu và gán phân cấp phòng ban.',
-    scope: 'CROSS_DEPARTMENT',
-    capabilities: [
-      'Thêm/xóa/điều chỉnh tài khoản',
-      'Phân chia phòng ban và quan hệ quản lý',
-      'Có mọi quyền cấp dưới'
-    ],
-    assignsTo: ['CHAIRMAN', 'DEPUTY_CHAIR', 'DEPARTMENT_HEAD', 'EMPLOYEE'],
-  },
 ];
 
 export const ROLE_MAP = ROLE_DEFINITIONS.reduce<Record<RoleKey, RoleDefinition>>(
@@ -127,10 +114,6 @@ export const ROLE_DIRECTORY: Record<
     role: 'AGGREGATOR',
     displayName: 'Đỗ Gia Hưng',
   },
-  'admin@duan.gov.vn': {
-    role: 'ADMIN',
-    displayName: 'Admin Hệ thống',
-  },
 };
 
 export const DEFAULT_ROLE: RoleKey = 'EMPLOYEE';
@@ -141,5 +124,4 @@ export const ROLE_ORDER: RoleKey[] = [
   'DEPUTY_CHAIR',
   'AGGREGATOR',
   'CHAIRMAN',
-  'ADMIN',
 ];

@@ -1,16 +1,16 @@
 import {
-  differenceInCalendarDays,
-  isBefore,
-  isWithinInterval,
-  parseISO,
+    differenceInCalendarDays,
+    isBefore,
+    isWithinInterval,
+    parseISO,
 } from 'date-fns';
 import {
-  RoleKey,
-  StatusFilter,
-  Task,
-  TaskMetrics,
-  TaskUrgency,
-  TimeframeFilter,
+    RoleKey,
+    StatusFilter,
+    Task,
+    TaskMetrics,
+    TaskUrgency,
+    TimeframeFilter,
 } from '../types';
 import { getTimeframeRange } from './date';
 
@@ -54,12 +54,20 @@ export const filterTasks = (
       return true;
     }
 
+    if (statusScope === 'COMPLETED') {
+      return task.status === 'COMPLETED';
+    }
+
     const urgency = getTaskUrgency(task);
     if (statusScope === 'OVERDUE') {
       return urgency === 'OVERDUE';
     }
 
-    return urgency === 'DUE_SOON';
+    if (statusScope === 'DUE_SOON') {
+      return urgency === 'DUE_SOON';
+    }
+
+    return true;
   });
 };
 
@@ -74,8 +82,16 @@ export const buildTaskMetrics = (
     .length;
   const dueSoon = scopedTasks.filter(task => getTaskUrgency(task) === 'DUE_SOON')
     .length;
-  const completed = scopedTasks.filter(task => task.status === 'COMPLETED').length;
+  const completedTasks = scopedTasks.filter(task => task.status === 'COMPLETED');
+  const completed = completedTasks.length;
   const total = scopedTasks.length;
+  const completedOnTime = completedTasks.filter(
+    task => getTaskUrgency(task) !== 'OVERDUE',
+  ).length;
+  const completedLate = completed - completedOnTime;
+  const inProgress = scopedTasks.filter(task =>
+    task.status === 'NEW' || task.status === 'IN_PROGRESS' || task.status === 'REVIEW',
+  ).length;
 
   const completionRate = total === 0 ? 0 : Math.round((completed / total) * 100);
 
@@ -85,5 +101,8 @@ export const buildTaskMetrics = (
     dueSoon,
     completed,
     completionRate,
+    completedOnTime,
+    completedLate,
+    inProgress,
   };
 };

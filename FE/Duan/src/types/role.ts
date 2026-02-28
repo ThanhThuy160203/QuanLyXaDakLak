@@ -3,8 +3,7 @@ export type RoleKey =
   | 'DEPARTMENT_HEAD'
   | 'DEPUTY_CHAIR'
   | 'CHAIRMAN'
-  | 'AGGREGATOR'
-  | 'ADMIN';
+  | 'AGGREGATOR';
 
 export type RoleDefinition = {
   key: RoleKey;

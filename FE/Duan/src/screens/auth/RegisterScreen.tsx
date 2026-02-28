@@ -1,15 +1,15 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
 import {
-	ActivityIndicator,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { ROLE_DEFINITIONS } from '../../constants/roles';
 import type { AuthStackParamList } from '../../navigation/AuthStack';
@@ -31,7 +31,7 @@ export const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
 	const error = useAuthStore(state => state.error);
 	const roleOptions = useMemo(
 		() =>
-			ROLE_DEFINITIONS.filter(def => def.key !== 'ADMIN').map(option => ({
+			ROLE_DEFINITIONS.map(option => ({
 				key: option.key,
 				label: option.label,
 			})),

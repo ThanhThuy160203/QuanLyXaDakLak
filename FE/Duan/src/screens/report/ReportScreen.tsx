@@ -1,165 +1,47 @@
-import { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { MetricCard } from '../../components/MetricCard';
+import { StyleSheet, Text, View } from 'react-native';
 import { ROLE_MAP } from '../../constants/roles';
 import { useTaskStore } from '../../store/task.store';
-import { buildTaskMetrics } from '../../utils/tasks';
+import { RoleKey } from '../../types';
+import { ROLE_SCREEN_REGISTRY } from '../roles/registry';
 
 export const ReportScreen = () => {
-	const tasks = useTaskStore(state => state.tasks);
 	const roleView = useTaskStore(state => state.roleView);
-	const timeframe = useTaskStore(state => state.timeframe);
+	const ScreenComponent = ROLE_SCREEN_REGISTRY[roleView]?.reports;
 
-	const metrics = useMemo(() => buildTaskMetrics(tasks, roleView, timeframe), [
-		tasks,
-		roleView,
-		timeframe,
-	]);
+	if (ScreenComponent) {
+		return <ScreenComponent />;
+	}
 
-	const sourceBreakdown = useMemo(() => {
-		const result: Record<string, number> = {};
-		tasks.forEach(task => {
-			if (task.assigneeRole === roleView || task.ownerRole === roleView) {
-				result[task.source] = (result[task.source] || 0) + 1;
-			}
-		});
-		return result;
-	}, [tasks, roleView]);
+	return <MissingReport role={roleView} />;
+};
 
-	const departmentRanking = useMemo(() => {
-		const bucket: Record<string, { completed: number; total: number }> = {};
-		tasks.forEach(task => {
-			if (task.assigneeRole !== roleView) {
-				return;
-			}
-			bucket[task.department] = bucket[task.department] || { completed: 0, total: 0 };
-			bucket[task.department].total += 1;
-			if (task.status === 'COMPLETED') {
-				bucket[task.department].completed += 1;
-			}
-		});
-
-		return Object.entries(bucket)
-			.map(([department, stats]) => ({
-				department,
-				rate: stats.total === 0 ? 0 : Math.round((stats.completed / stats.total) * 100),
-				total: stats.total,
-			}))
-			.sort((a, b) => b.rate - a.rate)
-			.slice(0, 4);
-	}, [tasks, roleView]);
-
-	const roleLabel = ROLE_MAP[roleView]?.label ?? roleView;
-
+const MissingReport = ({ role }: { role?: RoleKey }) => {
+	const label = role ? ROLE_MAP[role]?.label ?? role : 'cấp chưa xác định';
 	return (
-		<ScrollView contentContainerStyle={styles.screen}>
-			<Text style={styles.title}>Báo cáo nhanh</Text>
-			<Text style={styles.subtitle}>Tổng hợp số liệu cấp {roleLabel.toLowerCase()} trong khung thời gian đã chọn.</Text>
-
-			<View style={styles.metricRow}>
-				<MetricCard label="Tổng nhiệm vụ" value={String(metrics.total)} helper="Tính theo bộ lọc thời gian" />
-				<MetricCard label="Hoàn thành" value={`${metrics.completionRate}%`} helper={`${metrics.completed} nhiệm vụ`} accent="#16A34A" />
-			</View>
-			<View style={styles.metricRow}>
-				<MetricCard label="Quá hạn" value={String(metrics.overdue)} accent="#DC2626" helper="Cần đôn đốc" />
-				<MetricCard label="Sắp đến hạn" value={String(metrics.dueSoon)} accent="#F97316" helper="Theo dõi trong 72h" />
-			</View>
-
-			<View style={styles.section}>
-				<Text style={styles.sectionTitle}>Phân loại nguồn giao</Text>
-				{Object.entries(sourceBreakdown).map(([source, count]) => (
-					<View key={source} style={styles.row}>
-						<Text style={styles.rowLabel}>{renderSourceLabel(source)}</Text>
-						<Text style={styles.rowValue}>{count}</Text>
-					</View>
-				))}
-				{!Object.keys(sourceBreakdown).length && (
-					<Text style={styles.emptyText}>Chưa có dữ liệu nguồn phù hợp.</Text>
-				)}
-			</View>
-
-			<View style={styles.section}>
-				<Text style={styles.sectionTitle}>Xếp hạng phòng ban</Text>
-				{departmentRanking.map((item, index) => (
-					<View key={item.department} style={styles.row}>
-						<Text style={styles.rowLabel}>{index + 1}. {item.department}</Text>
-						<Text style={styles.rowValue}>{item.rate}% ({item.total})</Text>
-					</View>
-				))}
-				{!departmentRanking.length && (
-					<Text style={styles.emptyText}>Chưa có số liệu để xếp hạng.</Text>
-				)}
-			</View>
-		</ScrollView>
+		<View style={styles.missingContainer}>
+			<Text style={styles.missingTitle}>Chưa có báo cáo phù hợp</Text>
+			<Text style={styles.missingSubtitle}>Giao diện báo cáo cho {label} sẽ sớm được cập nhật.</Text>
+		</View>
 	);
 };
 
-const renderSourceLabel = (source: string) => {
-	switch (source) {
-		case 'SO':
-			return 'Sở/Ban/Ngành';
-		case 'UBND_TINH':
-			return 'UBND Tỉnh';
-		case 'UBND_HUYEN':
-			return 'UBND Huyện';
-		case 'CHU_TICH':
-			return 'Chủ tịch giao';
-		case 'NOI_BO':
-			return 'Nội bộ';
-		default:
-			return source;
-	}
-};
-
 const styles = StyleSheet.create({
-	screen: {
-		padding: 20,
+	missingContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		padding: 24,
 		backgroundColor: '#F8FAFC',
 	},
-	title: {
-		fontSize: 20,
+	missingTitle: {
+		fontSize: 18,
 		fontWeight: '700',
 		color: '#0F172A',
+		marginBottom: 8,
 	},
-	subtitle: {
-		fontSize: 13,
-		color: '#475569',
-		marginBottom: 16,
-		marginTop: 4,
-	},
-	metricRow: {
-		flexDirection: 'row',
-		marginBottom: 12,
-	},
-	section: {
-		borderRadius: 18,
-		borderWidth: 1,
-		borderColor: '#E2E8F0',
-		padding: 16,
-		backgroundColor: '#FFFFFF',
-		marginBottom: 16,
-	},
-	sectionTitle: {
-		fontSize: 15,
-		fontWeight: '600',
-		color: '#0F172A',
-		marginBottom: 12,
-	},
-	row: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		paddingVertical: 6,
-	},
-	rowLabel: {
+	missingSubtitle: {
 		fontSize: 14,
-		color: '#1E293B',
-	},
-	rowValue: {
-		fontWeight: '600',
-		color: '#0F172A',
-	},
-	emptyText: {
-		fontSize: 13,
-		color: '#94A3B8',
+		color: '#475569',
+		textAlign: 'center',
 	},
 });

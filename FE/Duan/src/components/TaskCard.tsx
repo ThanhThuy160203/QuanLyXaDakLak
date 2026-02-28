@@ -1,10 +1,12 @@
 import { format } from 'date-fns';
+import { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Task } from '../types';
 import { getTaskUrgency } from '../utils/tasks';
 
 interface TaskCardProps {
   task: Task;
+  footer?: ReactNode;
 }
 
 const urgencyColors = {
@@ -13,7 +15,7 @@ const urgencyColors = {
   ON_TRACK: '#10B981',
 };
 
-export const TaskCard = ({ task }: TaskCardProps) => {
+export const TaskCard = ({ task, footer }: TaskCardProps) => {
   const urgency = getTaskUrgency(task);
   const dueDate = format(new Date(task.dueDate), 'dd/MM/yyyy');
 
@@ -36,6 +38,7 @@ export const TaskCard = ({ task }: TaskCardProps) => {
         <Text style={styles.metaValue}>Hạn: {dueDate}</Text>
         <Text style={styles.metaValue}>Tiến độ: {task.progress}%</Text>
       </View>
+      {footer ? <View style={styles.footer}>{footer}</View> : null}
     </View>
   );
 };
@@ -90,5 +93,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1E293B',
     fontWeight: '500',
+  },
+  footer: {
+    marginTop: 12,
   },
 });

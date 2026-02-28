@@ -8,9 +8,10 @@ const timeframeOptions: { label: string; value: TimeframeFilter }[] = [
 ];
 
 const statusOptions: { label: string; value: StatusFilter }[] = [
-  { label: 'Toàn bộ', value: 'ALL' },
   { label: 'Quá hạn', value: 'OVERDUE' },
   { label: 'Sắp đến hạn', value: 'DUE_SOON' },
+  { label: 'Đã hoàn thành', value: 'COMPLETED' },
+  { label: 'Toàn bộ', value: 'ALL' },
 ];
 
 interface TaskFilterBarProps {
@@ -48,7 +49,7 @@ export const TaskFilterBar = ({
     </View>
 
     <View style={styles.filterGroup}>
-      <Text style={styles.groupLabel}>Mức độ</Text>
+      <Text style={styles.groupLabel}>Trạng thái</Text>
       <View style={styles.chipRow}>
         {statusOptions.map(option => {
           const isActive = option.value === statusScope;
