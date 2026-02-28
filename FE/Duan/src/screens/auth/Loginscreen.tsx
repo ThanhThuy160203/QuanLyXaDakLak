@@ -16,8 +16,8 @@ import { useAuthStore } from '../../store/auth.store';
 type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export const LoginScreen = ({ navigation }: LoginScreenProps) => {
-	const [email, setEmail] = useState('nhanvien@duan.gov.vn');
-	const [password, setPassword] = useState('DuAn@123');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 	const [localError, setLocalError] = useState<string | null>(null);
 	const login = useAuthStore(state => state.login);
 	const loading = useAuthStore(state => state.loading);
@@ -54,6 +54,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
 						value={email}
 						onChangeText={setEmail}
 						autoCapitalize="none"
+						autoComplete="off"
 						keyboardType="email-address"
 						style={styles.input}
 					/>
@@ -65,6 +66,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
 						placeholder="••••••••"
 						placeholderTextColor="#94A3B8"
 						secureTextEntry
+						autoComplete="off"
 						value={password}
 						onChangeText={setPassword}
 						style={styles.input}

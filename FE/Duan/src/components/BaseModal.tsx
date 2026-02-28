@@ -1,5 +1,15 @@
 import { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 interface BaseModalProps {
   visible: boolean;
@@ -9,19 +19,34 @@ interface BaseModalProps {
   footer?: ReactNode;
 }
 
+const CARD_MAX_HEIGHT = Dimensions.get('window').height * 0.85;
+
 export const BaseModal = ({ visible, title, onClose, children, footer }: BaseModalProps) => (
   <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
     <View style={styles.backdrop}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <Text style={styles.closeLabel}>Đóng</Text>
-          </Pressable>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 60}
+        style={styles.modalContainer}
+      >
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{title}</Text>
+            <Pressable onPress={onClose} hitSlop={8}>
+              <Text style={styles.closeLabel}>Đóng</Text>
+            </Pressable>
+          </View>
+          <ScrollView
+            style={styles.body}
+            contentContainerStyle={styles.bodyContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
+          {footer ? <View style={styles.footer}>{footer}</View> : null}
         </View>
-        <View style={styles.body}>{children}</View>
-        {footer ? <View style={styles.footer}>{footer}</View> : null}
-      </View>
+      </KeyboardAvoidingView>
     </View>
   </Modal>
 );
@@ -34,8 +59,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
+  modalContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
   card: {
     width: '100%',
+    maxHeight: CARD_MAX_HEIGHT,
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
     paddingVertical: 20,
@@ -59,6 +89,9 @@ const styles = StyleSheet.create({
   },
   body: {
     marginBottom: 12,
+  },
+  bodyContent: {
+    paddingBottom: 4,
   },
   footer: {
     flexDirection: 'row',

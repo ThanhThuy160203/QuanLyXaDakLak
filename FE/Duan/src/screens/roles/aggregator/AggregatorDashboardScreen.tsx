@@ -1,15 +1,17 @@
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+	ActivityIndicator,
+	Alert,
+	Platform,
+	Pressable,
+	ScrollView,
+	Share,
+	StyleSheet,
+	Text,
+	TextInput,
+	View
 } from 'react-native';
 import { AlertBanner } from '../../../components/AlertBanner';
 import { BaseModal } from '../../../components/BaseModal';
@@ -74,6 +76,7 @@ export const AggregatorDashboardScreen = () => {
 
 	const [creationForm, setCreationForm] = useState<TaskCreationForm>(() => buildCreationForm());
 	const [creationModalVisible, setCreationModalVisible] = useState(false);
+	const [iosDatePickerVisible, setIosDatePickerVisible] = useState(false);
 
 	useEffect(() => {
 		fetchTasks();
@@ -187,6 +190,34 @@ export const AggregatorDashboardScreen = () => {
 	const openCreationModal = () => {
 		setCreationForm(buildCreationForm());
 		setCreationModalVisible(true);
+		setIosDatePickerVisible(false);
+	};
+
+	const updateDueDate = (date: Date) => {
+		setCreationForm(prev => ({ ...prev, dueDate: format(date, 'yyyy-MM-dd') }));
+	};
+
+	const getCurrentDueDate = () => (creationForm.dueDate ? new Date(creationForm.dueDate) : new Date());
+
+	const openAndroidDatePicker = () => {
+		DateTimePickerAndroid.open({
+			value: getCurrentDueDate(),
+			mode: 'date',
+			minimumDate: new Date(),
+			onChange: (event: { type: string; }, selectedDate?: Date) => {
+				if (event.type === 'set' && selectedDate) {
+					updateDueDate(selectedDate);
+				}
+			},
+		});
+	};
+
+	const handleDueDatePress = () => {
+		if (Platform.OS === 'android') {
+			openAndroidDatePicker();
+			return;
+		}
+		setIosDatePickerVisible(prev => !prev);
 	};
 
 	const handleCreateTaskSubmit = () => {
@@ -215,6 +246,7 @@ export const AggregatorDashboardScreen = () => {
 			);
 			if (result) {
 				Alert.alert('Đã tạo nhiệm vụ', `Mã định danh ${result.id}`);
+				setIosDatePickerVisible(false);
 				setCreationModalVisible(false);
 			}
 		} catch {
@@ -382,7 +414,10 @@ export const AggregatorDashboardScreen = () => {
 				<BaseModal
 					visible={creationModalVisible}
 					title="Tạo nhiệm vụ mới"
-					onClose={() => setCreationModalVisible(false)}
+					onClose={() => {
+						setCreationModalVisible(false);
+						setIosDatePickerVisible(false);
+					}}
 				>
 					<Text style={styles.modalLabel}>Tiêu đề</Text>
 					<TextInput
@@ -414,13 +449,25 @@ export const AggregatorDashboardScreen = () => {
 							);
 						})}
 					</View>
-					<Text style={styles.modalLabel}>Hạn hoàn thành (YYYY-MM-DD)</Text>
-					<TextInput
-						style={styles.input}
-						value={creationForm.dueDate}
-						onChangeText={value => setCreationForm(prev => ({ ...prev, dueDate: value }))}
-						placeholder="2026-03-01"
-					/>
+					<Text style={styles.modalLabel}>Hạn hoàn thành</Text>
+					<Pressable style={[styles.input, styles.dateInput]} onPress={handleDueDatePress}>
+						<Text style={creationForm.dueDate ? styles.dateInputValue : styles.dateInputPlaceholder}>
+							{creationForm.dueDate ? format(new Date(creationForm.dueDate), 'dd/MM/yyyy') : 'Chọn hạn hoàn thành'}
+						</Text>
+					</Pressable>
+					{Platform.OS === 'ios' && iosDatePickerVisible ? (
+						<DateTimePicker
+							value={getCurrentDueDate()}
+							mode="date"
+							display="inline"
+							onChange={(event: any, selectedDate?: Date) => {
+								if (selectedDate) {
+									updateDueDate(selectedDate);
+								}
+							}}
+							style={styles.iosDatePicker}
+						/>
+					) : null}
 					<Text style={styles.modalLabel}>Giao cho cấp</Text>
 					<View style={styles.chipRow}>
 						{creationAssignableRoles.map(option => {
@@ -451,7 +498,13 @@ export const AggregatorDashboardScreen = () => {
 						placeholder="Ví dụ: Tư pháp"
 					/>
 					<View style={styles.modalFooter}>
-						<Pressable style={styles.modalButton} onPress={() => setCreationModalVisible(false)}>
+						<Pressable
+							style={styles.modalButton}
+							onPress={() => {
+								setCreationModalVisible(false);
+								setIosDatePickerVisible(false);
+							}}
+						>
 							<Text style={styles.modalButtonText}>Huỷ</Text>
 						</Pressable>
 						<Pressable style={[styles.modalButton, styles.modalButtonPrimary]} onPress={handleCreateTaskSubmit}>
@@ -710,9 +763,23 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 		backgroundColor: '#FFFFFF',
 	},
+	dateInput: {
+		justifyContent: 'center',
+	},
+	dateInputValue: {
+		fontSize: 14,
+		color: '#0F172A',
+	},
+	dateInputPlaceholder: {
+		fontSize: 14,
+		color: '#94A3B8',
+	},
 	multiline: {
 		height: 100,
 		textAlignVertical: 'top',
+	},
+	iosDatePicker: {
+		marginBottom: 12,
 	},
 	modalFooter: {
 		flexDirection: 'row',

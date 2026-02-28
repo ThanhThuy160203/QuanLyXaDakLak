@@ -1,8 +1,10 @@
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Platform,
     Pressable,
     ScrollView,
     Share,
@@ -74,6 +76,7 @@ export const ChairmanDashboardScreen = () => {
 
 	const [creationForm, setCreationForm] = useState<TaskCreationForm>(() => buildCreationForm());
 	const [creationModalVisible, setCreationModalVisible] = useState(false);
+	const [iosDatePickerVisible, setIosDatePickerVisible] = useState(false);
 
 	useEffect(() => {
 		fetchTasks();
@@ -155,6 +158,34 @@ export const ChairmanDashboardScreen = () => {
 	const openCreationModal = () => {
 		setCreationForm(buildCreationForm());
 		setCreationModalVisible(true);
+		setIosDatePickerVisible(false);
+	};
+
+	const updateDueDate = (date: Date) => {
+		setCreationForm(prev => ({ ...prev, dueDate: format(date, 'yyyy-MM-dd') }));
+	};
+
+	const getCurrentDueDate = () => (creationForm.dueDate ? new Date(creationForm.dueDate) : new Date());
+
+	const openAndroidDatePicker = () => {
+		DateTimePickerAndroid.open({
+			value: getCurrentDueDate(),
+			mode: 'date',
+			minimumDate: new Date(),
+			onChange: (event, selectedDate) => {
+				if (event.type === 'set' && selectedDate) {
+					updateDueDate(selectedDate);
+				}
+			},
+		});
+	};
+
+	const handleDueDatePress = () => {
+		if (Platform.OS === 'android') {
+			openAndroidDatePicker();
+			return;
+		}
+		setIosDatePickerVisible(prev => !prev);
 	};
 
 	const handleCreateTaskSubmit = () => {
@@ -183,6 +214,7 @@ export const ChairmanDashboardScreen = () => {
 			);
 			if (result) {
 				Alert.alert('Đã tạo nhiệm vụ', `Mã định danh ${result.id}`);
+				setIosDatePickerVisible(false);
 				setCreationModalVisible(false);
 			}
 		} catch {
@@ -337,7 +369,10 @@ export const ChairmanDashboardScreen = () => {
 				<BaseModal
 					visible={creationModalVisible}
 					title="Giao nhiệm vụ mới"
-					onClose={() => setCreationModalVisible(false)}
+					onClose={() => {
+						setCreationModalVisible(false);
+						setIosDatePickerVisible(false);
+					}}
 				>
 					<Text style={styles.modalLabel}>Tiêu đề</Text>
 					<TextInput
@@ -369,13 +404,25 @@ export const ChairmanDashboardScreen = () => {
 							);
 						})}
 					</View>
-					<Text style={styles.modalLabel}>Hạn hoàn thành (YYYY-MM-DD)</Text>
-					<TextInput
-						style={styles.input}
-						value={creationForm.dueDate}
-						onChangeText={value => setCreationForm(prev => ({ ...prev, dueDate: value }))}
-						placeholder="2026-03-01"
-					/>
+					<Text style={styles.modalLabel}>Hạn hoàn thành</Text>
+					<Pressable style={[styles.input, styles.dateInput]} onPress={handleDueDatePress}>
+						<Text style={creationForm.dueDate ? styles.dateInputValue : styles.dateInputPlaceholder}>
+							{creationForm.dueDate ? format(new Date(creationForm.dueDate), 'dd/MM/yyyy') : 'Chọn hạn hoàn thành'}
+						</Text>
+					</Pressable>
+					{Platform.OS === 'ios' && iosDatePickerVisible ? (
+						<DateTimePicker
+							value={getCurrentDueDate()}
+							mode="date"
+							display="inline"
+							onChange={(_, selectedDate) => {
+								if (selectedDate) {
+									updateDueDate(selectedDate);
+								}
+							}}
+							style={styles.iosDatePicker}
+						/>
+					) : null}
 					<Text style={styles.modalLabel}>Giao cho cấp</Text>
 					<View style={styles.chipRow}>
 						{creationAssignableRoles.map(option => {
@@ -406,7 +453,13 @@ export const ChairmanDashboardScreen = () => {
 						placeholder="Ví dụ: Văn phòng UBND"
 					/>
 					<View style={styles.modalFooter}>
-						<Pressable style={styles.modalButton} onPress={() => setCreationModalVisible(false)}>
+						<Pressable
+							style={styles.modalButton}
+							onPress={() => {
+								setCreationModalVisible(false);
+								setIosDatePickerVisible(false);
+							}}
+						>
 							<Text style={styles.modalButtonText}>Huỷ</Text>
 						</Pressable>
 						<Pressable style={[styles.modalButton, styles.modalButtonPrimary]} onPress={handleCreateTaskSubmit}>
@@ -647,9 +700,23 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 		backgroundColor: '#FFFFFF',
 	},
+	dateInput: {
+		justifyContent: 'center',
+	},
+	dateInputValue: {
+		fontSize: 14,
+		color: '#7C2D12',
+	},
+	dateInputPlaceholder: {
+		fontSize: 14,
+		color: '#94A3B8',
+	},
 	multiline: {
 		height: 100,
 		textAlignVertical: 'top',
+	},
+	iosDatePicker: {
+		marginBottom: 12,
 	},
 	modalFooter: {
 		flexDirection: 'row',
