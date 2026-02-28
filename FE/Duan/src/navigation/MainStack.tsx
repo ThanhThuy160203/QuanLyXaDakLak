@@ -1,7 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
 import { ReportScreen } from '../screens/report/ReportScreen';
+import { ProfileScreen } from '../screens/settings/ProfileScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { TaskListScreen } from '../screens/task/TaskListScreen';
 
@@ -12,9 +14,15 @@ export type MainTabParamList = {
 	Settings: undefined;
 };
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
+export type MainStackParamList = {
+	Tabs: undefined;
+	Profile: undefined;
+};
 
-export const MainStack = () => (
+const Tab = createBottomTabNavigator<MainTabParamList>();
+const Stack = createNativeStackNavigator<MainStackParamList>();
+
+const MainTabs = () => (
 	<Tab.Navigator
 		screenOptions={({ route }) => ({
 			headerShown: false,
@@ -31,6 +39,21 @@ export const MainStack = () => (
 		<Tab.Screen name="Reports" component={ReportScreen} options={{ title: 'Báo cáo' }} />
 		<Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Cài đặt' }} />
 	</Tab.Navigator>
+);
+
+export const MainStack = () => (
+	<Stack.Navigator>
+		<Stack.Screen
+			name="Tabs"
+			component={MainTabs}
+			options={{ headerShown: false }}
+		/>
+		<Stack.Screen
+			name="Profile"
+			component={ProfileScreen}
+			options={{ title: 'Hồ sơ cá nhân' }}
+		/>
+	</Stack.Navigator>
 );
 
 const getTabIcon = (routeName: keyof MainTabParamList) => {

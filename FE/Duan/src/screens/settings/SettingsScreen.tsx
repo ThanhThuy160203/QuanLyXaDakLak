@@ -1,14 +1,18 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAuthStore } from '../../store/auth.store';
+import type { MainStackParamList } from '../../navigation/MainStack';
 
 export const SettingsScreen = () => {
   const user = useAuthStore(state => state.user);
   const logout = useAuthStore(state => state.logout);
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleProfilePress = () => {
-    Alert.alert('Hồ sơ', 'Tính năng hồ sơ chi tiết sẽ sớm được bổ sung.');
+    navigation.navigate('Profile');
   };
 
   const handleLogoutPress = async () => {
